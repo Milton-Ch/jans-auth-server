@@ -46,7 +46,7 @@ import static io.jans.as.model.util.StringUtils.implode;
 /**
  * @author Javier Rojas Blum
  * @author Yuriy Movchan Date: 2016/04/26
- * @version July 28, 2021
+ * @version August 31, 2021
  */
 @WebServlet(urlPatterns = "/.well-known/openid-configuration", loadOnStartup = 10)
 public class OpenIdConfiguration extends HttpServlet {
@@ -288,6 +288,14 @@ public class OpenIdConfiguration extends HttpServlet {
 			if (tokenEndpointAuthSigningAlgValuesSupported.length() > 0) {
 				jsonObj.put(TOKEN_ENDPOINT_AUTH_SIGNING_ALG_VALUES_SUPPORTED,
 						tokenEndpointAuthSigningAlgValuesSupported);
+			}
+
+			JSONArray dpopSigningAlgValuesSupported = new JSONArray();
+			for (String dpopSigningAlg : appConfiguration.getDpopSigningAlgValuesSupported()) {
+				dpopSigningAlgValuesSupported.put(dpopSigningAlg);
+			}
+			if (dpopSigningAlgValuesSupported.length() > 0) {
+				jsonObj.put(DPOP_SIGNING_ALG_VALUES_SUPPORTED, dpopSigningAlgValuesSupported);
 			}
 
 			JSONArray displayValuesSupported = new JSONArray();

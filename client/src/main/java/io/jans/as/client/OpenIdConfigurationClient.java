@@ -24,7 +24,7 @@ import static io.jans.as.model.configuration.ConfigurationResponseClaim.*;
  * Encapsulates functionality to make OpenId Configuration request calls to an authorization server via REST Services.
  *
  * @author Javier Rojas Blum
- * @version July 28, 2021
+ * @version August 31, 2021
  */
 public class OpenIdConfigurationClient extends BaseClient<OpenIdConfigurationRequest, OpenIdConfigurationResponse> {
 
@@ -187,6 +187,7 @@ public class OpenIdConfigurationClient extends BaseClient<OpenIdConfigurationReq
         Util.addToListIfHas(response.getRequestObjectEncryptionEncValuesSupported(), jsonObj, REQUEST_OBJECT_ENCRYPTION_ENC_VALUES_SUPPORTED);
         Util.addToListIfHas(response.getTokenEndpointAuthMethodsSupported(), jsonObj, TOKEN_ENDPOINT_AUTH_METHODS_SUPPORTED);
         Util.addToListIfHas(response.getTokenEndpointAuthSigningAlgValuesSupported(), jsonObj, TOKEN_ENDPOINT_AUTH_SIGNING_ALG_VALUES_SUPPORTED);
+        Util.addToListIfHas(response.getDpopSigningAlgValuesSupported(), jsonObj, DPOP_SIGNING_ALG_VALUES_SUPPORTED);
         Util.addToListIfHas(response.getDisplayValuesSupported(), jsonObj, DISPLAY_VALUES_SUPPORTED);
         Util.addToListIfHas(response.getClaimTypesSupported(), jsonObj, CLAIM_TYPES_SUPPORTED);
         Util.addToListIfHas(response.getClaimsSupported(), jsonObj, CLAIMS_SUPPORTED);
