@@ -598,8 +598,26 @@
 			<artifactId>javax.websocket-api</artifactId>
 			<scope>test</scope>
 		</dependency>
+		<dependency>
+			<groupId>org.jboss.weld</groupId>
+			<artifactId>weld-junit5</artifactId>
+			<version>2.0.2.Final</version>
+			<scope>test</scope>
+		</dependency>
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-core</artifactId>
+            <version>3.12.4</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.13</version> <!-- DON"T use 4.13.1 bug in junit-vintage-engine:5.6.2, see https://github.com/junit-team/junit5/issues/2198-->
+            <scope>test</scope>
+        </dependency>
 
-		<!-- Test: Arquillian container and extensions -->
+        <!-- Test: Arquillian container and extensions -->
 		<dependency>
 			<groupId>org.jboss.arquillian.testng</groupId>
 			<artifactId>arquillian-testng-container</artifactId>
