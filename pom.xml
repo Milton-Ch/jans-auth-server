@@ -154,6 +154,11 @@
 				<artifactId>jans-auth-static</artifactId>
 				<version>${project.version}</version>
 			</dependency>
+			<dependency>
+				<groupId>io.jans</groupId>
+				<artifactId>jans-auth-server</artifactId>
+				<version>${project.version}</version>
+			</dependency>
 
 			<dependency>
 				<groupId>io.jans</groupId>
