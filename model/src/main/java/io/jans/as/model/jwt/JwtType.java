@@ -8,7 +8,7 @@ package io.jans.as.model.jwt;
 
 /**
  * @author Javier Rojas Blum
- * @version August 31, 2021
+ * @version September 2, 2021
  */
 public enum JwtType {
 
@@ -36,5 +36,10 @@ public enum JwtType {
             }
         }
         return null;
+    }
+
+    @Override
+    public String toString() {
+        return paramName;
     }
 }

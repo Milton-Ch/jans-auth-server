@@ -16,7 +16,7 @@ import java.util.List;
 
 /**
  * @author Javier Rojas Blum
- * @version February 12, 2019
+ * @version September 2, 2021
  */
 public class JSONWebKey implements Comparable<JSONWebKey> {
 
@@ -208,10 +208,14 @@ public class JSONWebKey implements Comparable<JSONWebKey> {
 
         jsonObj.put(JWKParameter.KEY_ID, kid);
         jsonObj.put(JWKParameter.KEY_TYPE, kty);
-        jsonObj.put(JWKParameter.KEY_USE, use != null ? use.getParamName() : "");
+        if (use != null) {
+            jsonObj.put(JWKParameter.KEY_USE, use.getParamName());
+        }
         jsonObj.put(JWKParameter.ALGORITHM, alg);
         jsonObj.put(JWKParameter.EXPIRATION_TIME, exp);
-        jsonObj.put(JWKParameter.CURVE, crv != null ? crv.getName() : "");
+        if (crv != null) {
+            jsonObj.put(JWKParameter.CURVE, crv.getName());
+        }
         if (!Util.isNullOrEmpty(n)) {
             jsonObj.put(JWKParameter.MODULUS, n);
         }

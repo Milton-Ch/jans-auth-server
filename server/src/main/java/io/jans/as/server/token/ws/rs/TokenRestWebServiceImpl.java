@@ -20,6 +20,7 @@ import io.jans.as.model.crypto.binding.TokenBindingMessage;
 import io.jans.as.model.error.ErrorResponseFactory;
 import io.jans.as.model.token.JsonWebResponse;
 import io.jans.as.model.token.TokenErrorResponseType;
+import io.jans.as.model.token.TokenRequestParam;
 import io.jans.as.server.audit.ApplicationAuditLogger;
 import io.jans.as.server.model.audit.Action;
 import io.jans.as.server.model.audit.OAuth2AuditLog;
@@ -29,12 +30,7 @@ import io.jans.as.server.model.session.SessionClient;
 import io.jans.as.server.model.token.JwrService;
 import io.jans.as.server.model.token.TokenParamsValidator;
 import io.jans.as.server.security.Identity;
-import io.jans.as.server.service.AuthenticationFilterService;
-import io.jans.as.server.service.AuthenticationService;
-import io.jans.as.server.service.DeviceAuthorizationService;
-import io.jans.as.server.service.GrantService;
-import io.jans.as.server.service.SessionIdService;
-import io.jans.as.server.service.UserService;
+import io.jans.as.server.service.*;
 import io.jans.as.server.service.ciba.CibaRequestService;
 import io.jans.as.server.service.external.ExternalResourceOwnerPasswordCredentialsService;
 import io.jans.as.server.service.external.ExternalUpdateTokenService;
@@ -67,7 +63,7 @@ import java.util.Date;
  *
  * @author Yuriy Zabrovarnyy
  * @author Javier Rojas Blum
- * @version May 5, 2020
+ * @version September 2, 2021
  */
 @Path("/")
 public class TokenRestWebServiceImpl implements TokenRestWebService {
@@ -119,7 +115,7 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
 
     @Inject
     private DeviceAuthorizationService deviceAuthorizationService;
-    
+
     @Inject
     private ExternalUpdateTokenService externalUpdateTokenService;
 
@@ -136,6 +132,8 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
                         "clientId = {}, ExtraParams = {}, isSecure = {}, codeVerifier = {}, ticket = {}",
                 grantType, code, redirectUri, username, refreshToken, clientId, request.getParameterMap(),
                 sec.isSecure(), codeVerifier, ticket);
+
+        runDPoP(request);
 
         boolean isUma = StringUtils.isNotBlank(ticket);
         if (isUma) {
@@ -236,7 +234,7 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
                         }
                         return null;
                     };
-                    
+
                     ExternalUpdateTokenContext context = new ExternalUpdateTokenContext(request, authorizationCodeGrant, client, appConfiguration, attributeService);
                     Function<JsonWebResponse, Void> postProcessor = externalUpdateTokenService.buildModifyIdTokenProcessor(context);
 
@@ -544,12 +542,13 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
 
     /**
      * Processes token request for device code grant type.
-     * @param grantType Grant type used, should be device code.
-     * @param client Client in process.
-     * @param deviceCode Device code generated in device authn request.
-     * @param scope Scope registered in device authn request.
-     * @param request HttpServletRequest
-     * @param response HttpServletResponse
+     *
+     * @param grantType      Grant type used, should be device code.
+     * @param client         Client in process.
+     * @param deviceCode     Device code generated in device authn request.
+     * @param scope          Scope registered in device authn request.
+     * @param request        HttpServletRequest
+     * @param response       HttpServletResponse
      * @param oAuth2AuditLog OAuth2AuditLog
      */
     private Response processDeviceCodeGrantType(final io.jans.as.model.common.GrantType grantType, final Client client, final String deviceCode,
@@ -666,6 +665,13 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
 
     private ResponseBuilder error(int p_status, TokenErrorResponseType p_type, String reason) {
         return Response.status(p_status).type(MediaType.APPLICATION_JSON_TYPE).entity(errorResponseFactory.errorAsJson(p_type, reason));
+    }
+
+    private void runDPoP(HttpServletRequest httpRequest) {
+        String dpopStr = httpRequest.getHeader(TokenRequestParam.DPOP);
+        if (StringUtils.isNotBlank(dpopStr)) {
+
+        }
     }
 
     /**

@@ -19,7 +19,7 @@ import static io.jans.as.model.token.TokenRequestParam.*;
  * server via REST Services.
  *
  * @author Javier Rojas Blum
- * @version August 31, 2021
+ * @version September 2, 2021
  */
 public class TokenClient extends BaseClient<TokenRequest, TokenResponse> {
 
@@ -224,7 +224,11 @@ public class TokenClient extends BaseClient<TokenRequest, TokenResponse> {
         clientRequest.setHttpMethod(getHttpMethod());
 
         if (getRequest().getDpop() != null) {
-            clientRequest.header(DPOP, getRequest().getDpop().toString());
+            try {
+                clientRequest.header(DPOP, getRequest().getDpop().getEncodedJwt());
+            } catch (Exception e) {
+                LOG.error(e.getMessage(), e);
+            }
         }
 
         if (getRequest().getGrantType() != null) {

@@ -4,16 +4,13 @@
  * Copyright (c) 2020, Janssen Project
  */
 
-package io.jans.as.client.model;
+package io.jans.as.model.jwt;
 
-import io.jans.as.client.util.ClientUtil;
 import io.jans.as.model.crypto.AbstractCryptoProvider;
 import io.jans.as.model.crypto.signature.AsymmetricSignatureAlgorithm;
 import io.jans.as.model.crypto.signature.SignatureAlgorithm;
 import io.jans.as.model.exception.InvalidJwtException;
 import io.jans.as.model.jwk.JSONWebKey;
-import io.jans.as.model.jwt.JwtHeader;
-import io.jans.as.model.jwt.JwtType;
 import io.jans.as.model.util.Base64Util;
 import io.jans.as.model.util.JwtUtil;
 import io.jans.as.model.util.Util;
@@ -31,9 +28,12 @@ import static io.jans.as.model.jwt.DPoPJwtPayloadParam.*;
 
 /**
  * @author Javier Rojas Blum
- * @version August 31, 2021
+ * @version September 2, 2021
  */
 public class DPoP {
+
+    private String keyId;
+    private String encodedJwt;
 
     // Header
     /**
@@ -68,7 +68,7 @@ public class DPoP {
     /**
      * Time at which the JWT was created.
      */
-    private Integer iat;
+    private Long iat;
     /**
      * Hash of the access token. Required when the DPoP proof is used in conjunction with the presentation of an
      * access token.
@@ -79,24 +79,25 @@ public class DPoP {
     private AbstractCryptoProvider cryptoProvider;
 
     public DPoP(AsymmetricSignatureAlgorithm asymmetricSignatureAlgorithm, JSONWebKey jwk, String jti, String htm, String htu,
-                AbstractCryptoProvider cryptoProvider) {
-        this(asymmetricSignatureAlgorithm, jwk, jti, htm, htu, new Date(), null, cryptoProvider);
+                String keyId, AbstractCryptoProvider cryptoProvider) {
+        this(asymmetricSignatureAlgorithm, jwk, jti, htm, htu, new Date(), null, keyId, cryptoProvider);
     }
 
     public DPoP(AsymmetricSignatureAlgorithm asymmetricSignatureAlgorithm, JSONWebKey jwk, String jti, String htm, String htu,
-                String accessTokenHash, AbstractCryptoProvider cryptoProvider) {
-        this(asymmetricSignatureAlgorithm, jwk, jti, htm, htu, new Date(), accessTokenHash, cryptoProvider);
+                String accessTokenHash, String keyId, AbstractCryptoProvider cryptoProvider) {
+        this(asymmetricSignatureAlgorithm, jwk, jti, htm, htu, new Date(), accessTokenHash, keyId, cryptoProvider);
     }
 
     public DPoP(AsymmetricSignatureAlgorithm asymmetricSignatureAlgorithm, JSONWebKey jwk, String jti, String htm, String htu,
-                Date issuedAt, String accessTokenHash, AbstractCryptoProvider cryptoProvider) {
+                Date issuedAt, String accessTokenHash, String keyId, AbstractCryptoProvider cryptoProvider) {
+        this.keyId = keyId;
         this.signatureAlgorithm = SignatureAlgorithm.fromString(asymmetricSignatureAlgorithm.getParamName());
         this.jwk = jwk;
 
         this.jti = jti;
         this.htm = htm;
         this.htu = htu;
-        this.iat = Util.getNumberOfSecondFromNow(issuedAt);
+        this.iat = issuedAt != null ? issuedAt.getTime() : new Date().getTime();
         this.ath = accessTokenHash;
 
         this.cryptoProvider = cryptoProvider;
@@ -180,11 +181,11 @@ public class DPoP {
         this.htu = htu;
     }
 
-    public Integer getIat() {
+    public Long getIat() {
         return iat;
     }
 
-    public void setIat(Integer iat) {
+    public void setIat(Long iat) {
         this.iat = iat;
     }
 
@@ -201,8 +202,6 @@ public class DPoP {
     }
 
     public String getEncodedJwt() throws Exception {
-        String encodedJwt = null;
-
         // Check header params:
         if (type != JwtType.DPOP_PLUS_JWT) {
             throw new InvalidJwtException("Type (typ) value must be dpop+jwt");
@@ -237,17 +236,22 @@ public class DPoP {
         JSONObject headerJsonObject = headerToJSONObject();
         JSONObject payloadJsonObject = payloadToJSONObject();
 
-        String headerString = ClientUtil.toPrettyJson(headerJsonObject);
-        String payloadString = ClientUtil.toPrettyJson(payloadJsonObject);
+        String headerString = headerJsonObject.toString();
+        String payloadString = payloadJsonObject.toString();
 
         String encodedHeader = Base64Util.base64urlencode(headerString.getBytes(Util.UTF8_STRING_ENCODING));
         String encodedPayload = Base64Util.base64urlencode(payloadString.getBytes(Util.UTF8_STRING_ENCODING));
 
         String signingInput = encodedHeader + "." + encodedPayload;
-        String encodedSignature = cryptoProvider.sign(signingInput, null, null, signatureAlgorithm);
+        String encodedSignature = cryptoProvider.sign(signingInput, keyId, null, signatureAlgorithm);
 
         encodedJwt = encodedHeader + "." + encodedPayload + "." + encodedSignature;
 
+        return encodedJwt;
+    }
+
+    @Override
+    public String toString() {
         return encodedJwt;
     }
 
@@ -256,7 +260,7 @@ public class DPoP {
 
         jwtHeader.setType(type);
         jwtHeader.setAlgorithm(signatureAlgorithm);
-        // TODO: JWK
+        jwtHeader.setJwk(jwk.toJSONObject());
 
         return jwtHeader.toJsonObject();
     }

@@ -6,9 +6,9 @@
 
 package io.jans.as.client;
 
+import io.jans.as.model.jwt.DPoP;
 import io.jans.as.model.common.AuthenticationMethod;
 import io.jans.as.model.common.GrantType;
-import io.jans.as.model.jwt.Jwt;
 import io.jans.as.model.token.ClientAssertionType;
 import io.jans.as.model.uma.UmaScopeType;
 import io.jans.as.model.util.QueryBuilder;
@@ -21,7 +21,7 @@ import java.util.Map;
  * Represents a token request to send to the authorization server.
  *
  * @author Javier Rojas Blum
- * @version August 31, 2021
+ * @version September 2, 2021
  */
 public class TokenRequest extends ClientAuthnRequest {
 
@@ -36,7 +36,7 @@ public class TokenRequest extends ClientAuthnRequest {
     private String codeVerifier;
     private String authReqId;
     private String deviceCode;
-    private Jwt dpop;
+    private DPoP dpop;
 
     /**
      * Constructs a token request.
@@ -239,11 +239,11 @@ public class TokenRequest extends ClientAuthnRequest {
         this.deviceCode = deviceCode;
     }
 
-    public Jwt getDpop() {
+    public DPoP getDpop() {
         return dpop;
     }
 
-    public void setDpop(Jwt dpop) {
+    public void setDpop(DPoP dpop) {
         this.dpop = dpop;
     }
 
